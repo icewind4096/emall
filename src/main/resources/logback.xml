@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <configuration>
     <appender name="consolelog" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -21,7 +22,7 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>
-                src\main\resources\log\info.%d.log
+                src\main\resources\logs\info.%d.log
             </fileNamePattern>
         </rollingPolicy>
     </appender>
@@ -37,12 +38,12 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>
-                src\main\resources\log\err.%d.log
+                src\main\resources\logs\err.%d.log
             </fileNamePattern>
         </rollingPolicy>
     </appender>
 
-    <root level="DEBUG">
+    <root level="info">
         <appender-ref ref="consolelog" />
         <appender-ref ref="fileInfoLog" />
         <appender-ref ref="fileErrLog" />
