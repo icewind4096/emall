@@ -18,4 +18,51 @@
   spring： 
       jackson:
           default-property-inclusion: non_null  
+```  
+
+#本地缓存 - Guava  
+1. initialCapacity 指的是记录的条数  
+2. 如果没有命中数据，则调用如下方法  
+```java  
+private static LoadingCache<String, String> loadingCache = CacheBuilder.newBuilder()
+           .initialCapacity(1000)
+           .maximumSize(10000)
+           .expireAfterAccess(12, TimeUnit.HOURS)
+//如果没有命中数据，则调用如下方法
+           .build(new CacheLoader<String, String>() {
+               @Override
+               public String load(String s) throws Exception {
+                   return null;
+               }
+//
+            })
+```
+
+#中文字符乱码
+1.检查web.xml中是否配置了过滤器,强制转换为UTF-8
+```xml
+  <filter>
+      <filter-name>characterEncodingFilter</filter-name>
+      <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+      <init-param>
+        <param-name>encoding</param-name>
+        <param-value>UTF-8</param-value>
+      </init-param>
+      <init-param>
+        <param-name>forceEncoding</param-name>
+        <param-value>true</param-value>
+      </init-param>
+  </filter>
+  <filter-mapping>
+      <filter-name>characterEncodingFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
+```  
+
+2.修改tomcat服务器的配置文件 server.xml, 增加URIEncoding="UTF-8"
+```xml
+    <Connector URIEncoding="UTF-8" 
+               port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
 ```
