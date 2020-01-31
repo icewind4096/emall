@@ -51,11 +51,11 @@
         <property name="mapperLocations" value="classpath*:mappers/*Mapper.xml"/>
         <property name="plugins">
             <array>
-                <bean class="com.github.pagehelper.PageHelper">
+                <bean class="com.github.pagehelper.PageInterceptor">
                     <property name="properties">
                         <value>
-                            dialect=mysql
-                        </value>
+                            helperDialect=mysql
+　　　　　　　　　　　　　　  </value>
                     </property>
                 </bean>
             </array>
