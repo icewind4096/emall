@@ -185,6 +185,20 @@ public class UserService implements IUserService {
         return ServerResponse.createBySuccess(User2UserDTO.convert(user));
     }
 
+    @Override
+    public ServerResponse isManagerRole(String username) {
+    //获取用户信息
+        User user = userMapper.getInformationByUserName(username);
+        if(user == null){
+            return ServerResponse.createByError("用户不存在");
+        }
+    //判断是否是管理员
+        if(user.getRole() == RoleCode.ADMIN.getCode()){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError("用户不具备管理员权限");
+    }
+
     private int updatePassword(String username, String password) {
         return userMapper.updatePasswordByUserName(username, convertPassword2MD5(password));
     }

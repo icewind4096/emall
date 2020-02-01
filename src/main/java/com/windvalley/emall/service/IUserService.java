@@ -21,4 +21,6 @@ public interface IUserService {
     ServerResponse<UserDTO> updateInformation(UserDTO convert);
 
     ServerResponse<UserDTO> getInformatioin(String username);
+
+    ServerResponse isManagerRole(String username);
 }
