@@ -28,7 +28,7 @@ private static LoadingCache<String, String> loadingCache = CacheBuilder.newBuild
            .initialCapacity(1000)
            .maximumSize(10000)
            .expireAfterAccess(12, TimeUnit.HOURS)
-//如果没有命中数据，则调用如下方法
+//如果没有命中数据，则调用如下方法装载数据
            .build(new CacheLoader<String, String>() {
                @Override
                public String load(String s) throws Exception {
@@ -65,4 +65,61 @@ private static LoadingCache<String, String> loadingCache = CacheBuilder.newBuild
                port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
                redirectPort="8443" />
+```
+
+#JAVA小知识
+1.类代码执行顺序  
+&ensp;&ensp;静态代码块>普通代码块->构造函数
+```java
+    public foo{
+        static {
+            //静态代码块
+        }
+    
+        {
+            //普通代码块
+        }
+    
+        public foo() {
+            //构造函数
+        }
+    }
+```
+
+#PageHeper的使用步骤  
+1.开始一个Page  
+```java
+    PageHelper.startPage(pageNumber, pageSize);
+```
+2.填充sql查询逻辑, 只有紧跟着startPage的第一个select方法会被分页
+3.用PageInfo对结果进行包装
+4.PageInfo的排序格式为 fieldName orderby, 切记中间有个空格
+
+#路径
+如果访问的URL是 http://localhost:8080/store/UserServlet?method=findByName
+request.getServletPath() -> /UserServlet
+request.getContextPath() -> /store
+request.getRequestURI()  -> /store/UserServlet
+request.getRequestURL()  -> http://localhost:8080/store/UserServlet
+request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
+
+#文件上传
+1.配置web-inf/dispatcher-servlet.xml
+```java
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="10485760"/>
+        <property name="maxInMemorySize" value="4096"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+```
+2.如果上传的是富文本，有特点返回格式, 并且要修改response的Header部分
+&ensp;&ensp;以下是以simditor为目标返回的
+```java
+    {
+        "success", true/false), #成功/失败
+        "msg", "error message"  #选项
+        "file_path", url        #文件路径
+    }
+
+    response.addHeader("Access-Control-Allow-Headers", "X-File-Name");
 ```
