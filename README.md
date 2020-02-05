@@ -133,3 +133,7 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 
     response.addHeader("Access-Control-Allow-Headers", "X-File-Name");
 ```
+
+##mybatis
+1.插入时需要使用数据库产生的ID，使用useGeneratedKeys="true"
+2.插入后需要返回插入的特定字段值，使用keyProperty="你要返回的字段名"

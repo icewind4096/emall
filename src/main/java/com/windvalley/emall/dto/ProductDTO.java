@@ -1,8 +1,6 @@
 package com.windvalley.emall.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.windvalley.emall.util.serializer.Data2LongSerializer;
 import lombok.Data;
 
 import java.math.BigDecimal;
