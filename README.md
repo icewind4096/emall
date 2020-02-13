@@ -137,3 +137,33 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 ##mybatis
 1.插入时需要使用数据库产生的ID，使用useGeneratedKeys="true"
 2.插入后需要返回插入的特定字段值，使用keyProperty="你要返回的字段名"
+
+##转换二维码
+1.参考https://github.com/MycroftWong/ZxingDemo
+
+##支付
+###支付宝
+####参考文档  
+1.沙箱登录 https://openhome.alipay.com/platform/appDaily.htm    
+2.沙箱环境使用说明 https://docs.open.alipay.com/200/105311/  
+3.如何使用沙箱环境 https://opensupport.alipay.com/support/knowCategory/20068    
+4.当面付产品介绍 https://docs.open.alipay.com/194/105072  
+5.扫码支付接入指引 https://docs.open.alipay.com/194/106078/  
+6.当面付接入必读 https://docs.open.alipay.com/194/105322/  
+7.当面付进阶功能 https://docs.open.alipay.com/194/105190/  
+8.当面付的异步通知-仅用于扫码支付 https://docs.open.alipay.com/194/103296/  
+9.当面付SDK&DEMO https://docs.open.alipay.com/194/105201/  
+10.生成RSA秘钥 https://docs.open.alipay.com/291/106103/  
+11.线上创建应用说明
+####小细节
+1.使用SDK接入是，两种签名方式  
+A. 普通公钥方式  
+B. 公钥证书方式  
+如果使用普通公钥方式签名，不可以调用public DefaultAlipayClient(CertAlipayRequest certAlipayRequest)这个构造方法  
+因为这样会导致构造器在读取根证书时为Null，产生一个异常
+
+2.alipayClient.execute(request)返回的状态只需要判断10000和40004，如果10000，则subCode为空,  
+所以可以直接调用response.isSuccess()判断是否调用成功, response.isSuccess判断的就是subCode为空  
+  
+  
+###微信

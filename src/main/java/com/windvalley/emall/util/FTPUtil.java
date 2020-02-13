@@ -32,8 +32,8 @@ public class FTPUtil {
     private boolean uploadFiles(String remotePath, List<File> fileList){
         boolean success = true;
         if (connectFTPServer(ip, port, userName, password) == true){
-            setFTPConfig(remotePath);
             for (File file: fileList){
+                setFTPConfig(remotePath);
                 if (translateFile(file) == false){
                     success = false;
                     break;
@@ -67,9 +67,13 @@ public class FTPUtil {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
-            ftpClient.storeFile(file.getName(), fis);
-            log.info("上传ftp服务器文件成功->{}", file.getName());
-            return true;
+            if (ftpClient.storeFile(file.getName(), fis)){
+                log.info("上传ftp服务器文件成功->{}", file.getName());
+                return true;
+            } else {
+                log.info("上传ftp服务器文件失败");
+                return false;
+            }
         } catch (IOException e) {
             log.info("上传ftp服务器文件失败 ", e);
             return false;
@@ -91,19 +95,15 @@ public class FTPUtil {
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
         //传输文件类型编码方式
             ftpClient.setControlEncoding("UTF-8");
-        //设置访问被动模式
-            ftpClient.enterLocalPassiveMode();
-        //设置缓冲区大小
-            ftpClient.setBufferSize(2048);
-        //设置传输超时
-            ftpClient.setDataTimeout(60000);
-        //设置连接超时
-            ftpClient.setConnectTimeout(60000);
-        //改变工作目录
+            //改变工作目录
             log.info("设置FTP服务器 修改工作目录");
             ftpClient.changeWorkingDirectory(remotePath);
             log.info("设置FTP服务器 修改工作目录成功->{}", remotePath);
             log.info("设置FTP服务器成功");
+        //设置缓冲区大小
+            ftpClient.setBufferSize(1024);
+        //设置访问被动模式
+            ftpClient.enterLocalPassiveMode();
         } catch (IOException e) {
             log.error("设置FTP服务器->失败", e);
         }
@@ -112,6 +112,10 @@ public class FTPUtil {
     private boolean connectFTPServer(String ip, Integer port, String userName, String password) {
         ftpClient = new FTPClient();
         try {
+            //设置传输超时
+            ftpClient.setDataTimeout(2000);
+            //设置连接超时
+            ftpClient.setConnectTimeout(2000);
             log.info("开始连接FTP服务器");
             ftpClient.connect(ip, port);
             log.info("开始登录FTP服务器");

@@ -3,7 +3,7 @@ package com.windvalley.emall.enums;
 import lombok.Getter;
 
 @Getter
-public enum CartCheckEnum {
+public enum CartCheck {
     UNCHECK(0, "未选中"),
     CHECK(1, "选中"),
     ;
@@ -11,7 +11,7 @@ public enum CartCheckEnum {
     private int code;
     private String descript;
 
-    CartCheckEnum(int code, String descript) {
+    CartCheck(int code, String descript) {
         this.code = code;
         this.descript = descript;
     }

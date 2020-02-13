@@ -1,6 +1,5 @@
 package com.windvalley.emall.service.impl;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.google.common.collect.Lists;
 import com.windvalley.emall.service.IFileService;
 import com.windvalley.emall.util.FTPUtil;
@@ -19,17 +18,32 @@ import java.util.UUID;
 public class FileService implements IFileService {
     @Override
     public String upload(MultipartFile file, String path) {
-        //此时文件已经上传到服务的临时目录中，后缀名为.tmp
+    //建立上传文件存放路径
+        makeDirectory(path);
+    //此时文件已经上传到服务的临时目录中，后缀名为.tmp
         File uploadFile = saveFileToWebServer(file, path);
         if (uploadFile != null) {
-            //把保存到web服务器的上传目录中的文件，上传到ftp服务器的image目录中
+    //把保存到web服务器的上传目录中的文件，上传到ftp服务器的image目录中
             boolean upload2Ftp = translateFileToFTPServer(getFTPServerWorkDir(), Lists.newArrayList(uploadFile));
-            //不管文件上传到ftp服务器是否成功,都把保存到web服务器的上传目录中的文件删除
+    //不管文件上传到ftp服务器是否成功,都把保存到web服务器的上传目录中的文件删除
             deleteFileInWebServer(uploadFile);
             if (upload2Ftp == true) {
             //返回上传文件名
                 return uploadFile.getName();
             }
+        }
+        return null;
+    }
+
+    @Override
+    public String upload(File file) {
+    //把保存到web服务器的上传目录中的文件，上传到ftp服务器的image目录中
+        boolean upload2Ftp = translateFileToFTPServer(getFTPServerWorkDir(), Lists.newArrayList(file));
+    //不管文件上传到ftp服务器是否成功,都把保存到web服务器的上传目录中的文件删除
+        //deleteFileInWebServer(file);
+        if (upload2Ftp == true) {
+            //返回上传文件名
+            return file.getName();
         }
         return null;
     }
@@ -42,8 +56,8 @@ public class FileService implements IFileService {
         file.delete();
     }
 
-    private boolean translateFileToFTPServer(String image, ArrayList<File> files) {
-        return FTPUtil.uploadFile("image", Lists.newArrayList(files));
+    private boolean translateFileToFTPServer(String remotePath, ArrayList<File> files) {
+        return FTPUtil.uploadFile(remotePath, Lists.newArrayList(files));
     }
 
     private File saveFileToWebServer(MultipartFile file, String path) {
@@ -53,7 +67,6 @@ public class FileService implements IFileService {
         log.info("开始上传文件： 源文件名->{} 上传路径->{} 新文件名->{}", originalFileName, path, uploadFileName);
     //检查WEB服务器存放目录是否存在, 不存在，就建立目录
         log.info("开始上传文件 建立目录：{}", path);
-        makeDirectory(path);
     //把上传的临时文件，保存到web服务器的上传目录中
         log.info("开始上传文件 保存文件到web服务器的上传目录：{}", path);
         return saveToFile(file, path, uploadFileName);

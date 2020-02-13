@@ -1,14 +1,10 @@
 package com.windvalley.emall.controller.portal;
 
 import com.github.pagehelper.PageInfo;
-import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.dto.ProductDTO;
-import com.windvalley.emall.dto.UserDTO;
-import com.windvalley.emall.enums.ResponseCode;
 import com.windvalley.emall.service.IProductService;
 import com.windvalley.emall.service.IUserService;
-import com.windvalley.emall.service.impl.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,6 +1,6 @@
 package com.windvalley.emall.dto;
 
-import com.windvalley.emall.enums.CartCheckEnum;
+import com.windvalley.emall.enums.CartCheck;
 import com.windvalley.emall.util.BigDecimalUtil;
 import lombok.Data;
 
@@ -17,7 +17,7 @@ public class CartDTO {
 
     private Boolean calculateAllCheck(List<CartItemDTO> cartItems) {
         for (CartItemDTO cartItemDTO: cartItems){
-            if (cartItemDTO.getCheck() == CartCheckEnum.UNCHECK.getCode()){
+            if (cartItemDTO.getCheck() == CartCheck.UNCHECK.getCode()){
                 return false;
             }
         }

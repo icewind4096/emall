@@ -6,13 +6,12 @@ import com.windvalley.emall.dao.CartMapper;
 import com.windvalley.emall.dto.CartDTO;
 import com.windvalley.emall.dto.CartItemDTO;
 import com.windvalley.emall.dto.ProductDTO;
-import com.windvalley.emall.enums.CartCheckEnum;
+import com.windvalley.emall.enums.CartCheck;
 import com.windvalley.emall.pojo.Cart;
 import com.windvalley.emall.service.ICartService;
 import com.windvalley.emall.service.IProductService;
 import com.windvalley.emall.util.BigDecimalUtil;
 import com.windvalley.emall.util.PropertiesUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -76,7 +75,7 @@ public class CartService implements ICartService {
 
     @Override
     public ServerResponse checkAll(Integer userId) {
-        if (changeCheckStatus(userId, CartCheckEnum.CHECK.getCode(), null)){
+        if (changeCheckStatus(userId, CartCheck.CHECK.getCode(), null)){
             return ServerResponse.createBySuccess("购物车全选成功");
         }
         return ServerResponse.createBySuccess("购物车全选失败");
@@ -84,7 +83,7 @@ public class CartService implements ICartService {
 
     @Override
     public ServerResponse unCheckAll(Integer userId) {
-        if (changeCheckStatus(userId, CartCheckEnum.UNCHECK.getCode(), null)){
+        if (changeCheckStatus(userId, CartCheck.UNCHECK.getCode(), null)){
             return ServerResponse.createBySuccess("购物车全反选成功");
         }
         return ServerResponse.createBySuccess("购物车全反选失败");
@@ -92,7 +91,7 @@ public class CartService implements ICartService {
 
     @Override
     public ServerResponse check(Integer userId, Integer productId) {
-        if (changeCheckStatus(userId, CartCheckEnum.CHECK.getCode(), productId)){
+        if (changeCheckStatus(userId, CartCheck.CHECK.getCode(), productId)){
             return ServerResponse.createBySuccess("购物车全反选成功");
         }
         return ServerResponse.createBySuccess("购物车全反选失败");
@@ -100,7 +99,7 @@ public class CartService implements ICartService {
 
     @Override
     public ServerResponse unCheck(Integer userId, Integer productId) {
-        if (changeCheckStatus(userId, CartCheckEnum.UNCHECK.getCode(), productId)){
+        if (changeCheckStatus(userId, CartCheck.UNCHECK.getCode(), productId)){
             return ServerResponse.createBySuccess("购物车全反选成功");
         }
         return ServerResponse.createBySuccess("购物车全反选失败");
@@ -144,7 +143,7 @@ public class CartService implements ICartService {
 
     private boolean updateCart(Cart cart, Integer count) {
         cart.setQuantity(cart.getQuantity() + count);
-        cart.setChecked(CartCheckEnum.CHECK.getCode());
+        cart.setChecked(CartCheck.CHECK.getCode());
         return cartMapper.updateByPrimaryKeySelective(cart) > 0;
     }
 
@@ -153,7 +152,7 @@ public class CartService implements ICartService {
         cart.setUserId(userId);
         cart.setProductId(productId);
         cart.setQuantity(count);
-        cart.setChecked(CartCheckEnum.CHECK.getCode());
+        cart.setChecked(CartCheck.CHECK.getCode());
         return cartMapper.insert(cart) > 0;
     }
 
