@@ -1,14 +1,14 @@
 package com.windvalley.emall.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
 public class ShippingDTO {
-    private Integer id;
-
+    @JsonIgnore
     private Integer userId;
 
     private String receiverName;
@@ -29,7 +29,4 @@ public class ShippingDTO {
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
     private Date createTime;
-
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-    private Date updateTime;
 }

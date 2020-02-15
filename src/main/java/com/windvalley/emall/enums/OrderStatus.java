@@ -19,4 +19,14 @@ public enum OrderStatus {
         this.code = code;
         this.descript = descript;
     }
+
+    public static String getDescriptByCode(int status){
+        //values就是枚举的全部类型
+        for (OrderStatus orderStatus: values()){
+            if (orderStatus.getCode() == status){
+                return orderStatus.getDescript();
+            }
+        }
+        return null;
+    }
 }

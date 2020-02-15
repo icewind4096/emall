@@ -16,4 +16,12 @@ public enum PayPlatform {
         this.descript = descript;
     }
 
+    public static String getDescriptByCode(Integer status) {
+        for (PayPlatform payPlatform: values()){
+            if (payPlatform.getCode() == status){
+                return payPlatform.getDescript();
+            }
+        }
+        return null;
+    }
 }

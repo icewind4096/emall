@@ -2,6 +2,7 @@ package com.windvalley.emall.controller.portal;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.github.pagehelper.PageInfo;
 import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.dto.UserDTO;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +31,93 @@ import java.util.Map;
 public class OrderController {
     @Autowired
     IOrderService orderService;
+
+    /**
+     * 新建订单
+     * @param httpSession
+     * @param shippingId
+     * @return
+     */
+    @RequestMapping("create.do")
+    @ResponseBody
+    public ServerResponse create(HttpSession httpSession, Integer shippingId){
+        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        if (serverResponse.isSuccess() == false){
+            return serverResponse;
+        }
+
+        return orderService.create(getUserIDFromSession(httpSession), shippingId);
+    }
+
+    /**
+     * 取消订单
+     * @param httpSession
+     * @param orderId
+     * @return
+     */
+    @RequestMapping("cancel.do")
+    @ResponseBody
+    public ServerResponse cancel(HttpSession httpSession, Long orderId){
+        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        if (serverResponse.isSuccess() == false){
+            return serverResponse;
+        }
+
+        return orderService.cancel(getUserIDFromSession(httpSession), orderId);
+    }
+
+    /**
+     * 得到购物车中已选择商品
+     * @param httpSession
+     * @return
+     */
+    @RequestMapping("getordercartproduct.do")
+    @ResponseBody
+    public ServerResponse getOrderCartProduct(HttpSession httpSession){
+        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        if (serverResponse.isSuccess() == false){
+            return serverResponse;
+        }
+
+        return orderService.getOrderCartProduct(getUserIDFromSession(httpSession));
+    }
+
+    /**
+     * 得到订单详情
+     * @param httpSession
+     * @param orderId
+     * @return
+     */
+    @RequestMapping("detail.do")
+    @ResponseBody
+    public ServerResponse detail(HttpSession httpSession, Long orderId) {
+        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        if (serverResponse.isSuccess() == false){
+            return serverResponse;
+        }
+
+        return orderService.detailByOrderIdAndUserId(getUserIDFromSession(httpSession), orderId);
+    }
+
+    /**
+     * 用户订单列表
+     * @param httpSession
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping("list.do")
+    @ResponseBody
+    public ServerResponse<PageInfo> list(HttpSession httpSession
+                                        ,@RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
+                                        ,@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        if (serverResponse.isSuccess() == false){
+            return serverResponse;
+        }
+
+        return orderService.getlistByUserId(getUserIDFromSession(httpSession), pageNumber, pageSize);
+    }
 
     /**
      * 订单支付
@@ -49,6 +138,12 @@ public class OrderController {
         return orderService.pay(getUserIDFromSession(httpSession), orderNo, path);
     }
 
+    /**
+     * 检查订单是否支付
+     * @param httpSession
+     * @param orderNo
+     * @return
+     */
     @RequestMapping("orderpaied.do")
     @ResponseBody
     public ServerResponse<Boolean> orderpaied(HttpSession httpSession, Long orderNo){
@@ -60,6 +155,11 @@ public class OrderController {
         return orderService.orderpaied(getUserIDFromSession(httpSession), orderNo);
     }
 
+    /**
+     * 支付宝支付成功以后的回调入口
+     * @param request
+     * @return
+     */
     @RequestMapping(value = "alipaycallback.do", method = RequestMethod.POST)
     @ResponseBody
     public Object alipayCallback(HttpServletRequest request) {

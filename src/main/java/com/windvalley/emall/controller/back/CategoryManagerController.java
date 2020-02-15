@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/manager/category")
+@RequestMapping("/manager/category/")
 @Slf4j
 public class CategoryManagerController {
     @Autowired
