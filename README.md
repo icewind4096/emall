@@ -71,7 +71,7 @@ private static LoadingCache<String, String> loadingCache = CacheBuilder.newBuild
 1.类代码执行顺序  
 &ensp;&ensp;静态代码块>普通代码块->构造函数
 ```java
-    public foo{
+    public class foo{
         static {
             //静态代码块
         }
@@ -115,7 +115,7 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 
 #文件上传
 1.配置web-inf/dispatcher-servlet.xml
-```java
+```xml
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="10485760"/>
         <property name="maxInMemorySize" value="4096"/>
@@ -124,7 +124,7 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 ```
 2.如果上传的是富文本，有特点返回格式, 并且要修改response的Header部分
 &ensp;&ensp;以下是以simditor为目标返回的
-```java
+```text
     {
         "success", true/false), #成功/失败
         "msg", "error message"  #选项
@@ -134,16 +134,16 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
     response.addHeader("Access-Control-Allow-Headers", "X-File-Name");
 ```
 
-##mybatis
+#mybatis
 1.插入时需要使用数据库产生的ID，使用useGeneratedKeys="true"
 2.插入后需要返回插入的特定字段值，使用keyProperty="你要返回的字段名"
 
-##转换二维码
+#转换二维码
 1.参考https://github.com/MycroftWong/ZxingDemo
 
-##支付
-###支付宝
-####参考文档  
+#支付
+##支付宝
+###参考文档  
 1.沙箱登录 https://openhome.alipay.com/platform/appDaily.htm    
 2.沙箱环境使用说明 https://docs.open.alipay.com/200/105311/  
 3.如何使用沙箱环境 https://opensupport.alipay.com/support/knowCategory/20068    
@@ -155,7 +155,7 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 9.当面付SDK&DEMO https://docs.open.alipay.com/194/105201/  
 10.生成RSA秘钥 https://docs.open.alipay.com/291/106103/  
 11.线上创建应用说明
-####小细节
+###小细节
 1.使用SDK接入是，两种签名方式  
 A. 普通公钥方式  
 B. 公钥证书方式  
@@ -166,4 +166,59 @@ B. 公钥证书方式
 所以可以直接调用response.isSuccess()判断是否调用成功, response.isSuccess判断的就是subCode为空  
   
   
-###微信
+##微信
+
+#MAVEN进行环境隔离  
+##步骤  
+###1.在build节点中添加环境隔离牵涉到的资源 
+```xml
+    <resources>
+      <resource>
+          <!-- 此处为发布时各自的资源, 例如配置 -->
+          <directory>src/main/resources.${deploy.type}</directory>
+          <excludes>
+            <!-- 排除全部的jsp文件 -->
+            <exclude>*.jsp</exclude>
+          </excludes>
+      </resource>
+      <resource>
+          <!-- 此处为发布时公共的资源, 例如配置 -->
+          <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+``` 
+###2.在Project节点下，添加Profiles节点, 确定要发布的环境变量以及默认激活项目
+```xml
+  <profiles>
+    <profile>
+      <!-- 此处配置为dev发布环境 -->
+      <id>dev</id>
+      <activation>
+        <!-- 开发环境为默认配置 -->
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <!-- 给上面resources->resource->${deploy.type}使用 -->
+        <deploy.type>dev</deploy.type>
+      </properties>
+    </profile>
+
+    <profile>
+      <!-- 此处配置为测试发布环境 -->
+      <id>test</id>
+      <properties>
+        <!-- 给上面resources->resource->${deploy.type}使用 -->
+        <deploy.type>test</deploy.type>
+      </properties>
+    </profile>
+
+    <profile>
+      <!-- 此处配置为生产发布环境 -->
+      <id>prod</id>
+      <properties>
+        <!-- 给上面resources->resource->${deploy.type}使用 -->
+        <deploy.type>prod</deploy.type>
+      </properties>
+    </profile>
+  </profiles>
+```

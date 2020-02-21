@@ -1,10 +1,8 @@
 package com.windvalley.emall.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 @Data
 public class CartItemDTO {
