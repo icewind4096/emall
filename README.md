@@ -38,7 +38,7 @@ private static LoadingCache<String, String> loadingCache = CacheBuilder.newBuild
             })
 ```
 
-#中文字符乱码
+#中文字符乱码  
 1.检查web.xml中是否配置了过滤器,强制转换为UTF-8
 ```text
   <filter>
@@ -67,8 +67,8 @@ private static LoadingCache<String, String> loadingCache = CacheBuilder.newBuild
                redirectPort="8443" />
 ```
 
-#JAVA小知识
-1.类代码执行顺序  
+#JAVA小知识  
+1.类代码执行顺序    
 &ensp;&ensp;静态代码块>普通代码块->构造函数
 ```java
     public class foo{
@@ -113,7 +113,7 @@ request.getRequestURI()  -> /store/UserServlet
 request.getRequestURL()  -> http://localhost:8080/store/UserServlet
 request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 
-#文件上传
+#文件上传  
 1.配置web-inf/dispatcher-servlet.xml
 ```xml
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
@@ -134,16 +134,16 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
     response.addHeader("Access-Control-Allow-Headers", "X-File-Name");
 ```
 
-#mybatis
+#mybatis  
 1.插入时需要使用数据库产生的ID，使用useGeneratedKeys="true"
 2.插入后需要返回插入的特定字段值，使用keyProperty="你要返回的字段名"
 
-#转换二维码
+#转换二维码  
 1.参考https://github.com/MycroftWong/ZxingDemo
 
-#支付
-##支付宝
-###参考文档  
+#支付  
+##支付宝  
+###参考文档    
 1.沙箱登录 https://openhome.alipay.com/platform/appDaily.htm    
 2.沙箱环境使用说明 https://docs.open.alipay.com/200/105311/  
 3.如何使用沙箱环境 https://opensupport.alipay.com/support/knowCategory/20068    
@@ -155,7 +155,7 @@ request.getRealPath("/") -> D:\apache-tomcat-6.0.13\webapps\WebDemo\
 9.当面付SDK&DEMO https://docs.open.alipay.com/194/105201/  
 10.生成RSA秘钥 https://docs.open.alipay.com/291/106103/  
 11.线上创建应用说明
-###小细节
+###小细节  
 1.使用SDK接入是，两种签名方式  
 A. 普通公钥方式  
 B. 公钥证书方式  
@@ -166,11 +166,11 @@ B. 公钥证书方式
 所以可以直接调用response.isSuccess()判断是否调用成功, response.isSuccess判断的就是subCode为空  
   
   
-##微信
+##微信  
 
 #MAVEN进行环境隔离  
 ##步骤  
-###1.在build节点中添加环境隔离牵涉到的资源 
+###1.在build节点中添加环境隔离牵涉到的资源  
 ```xml
     <resources>
       <resource>
@@ -187,7 +187,7 @@ B. 公钥证书方式
       </resource>
     </resources>
 ``` 
-###2.在Project节点下，添加Profiles节点, 确定要发布的环境变量以及默认激活项目
+###2.在Project节点下，添加Profiles节点, 确定要发布的环境变量以及默认激活项目  
 ```xml
   <profiles>
     <profile>
@@ -223,27 +223,27 @@ B. 公钥证书方式
   </profiles>
 ```
 
-#集群部署
-##Tomcat集群部署
-###原理
+#集群部署  
+##Tomcat集群部署  
+###原理  
 通过nginx负载均衡进行请求转发
-###多集群部署的问题
+###多集群部署的问题  
 1.Session登录信息存储以及读取的问题
-####解决方法1.可以通过nginx ip hash policy，实现，保证每个用户走的是同一个服务器
+####解决方法1.可以通过nginx ip hash policy，实现，保证每个用户走的是同一个服务器  
 &ensp;&ensp;优点：可以不改变当前架构,直接实现横向扩展  
 &ensp;&ensp;缺点：1.导致服务器负载均衡不平均,完全依赖IPHASH
 &ensp;&ensp;&ensp;&ensp;2.如果客户的网络环境不好，IP容易发生变化，将无法服务
-####解决方法2.可以通过分布式redis实现一个分布式session以及分布式锁
+####解决方法2.可以通过分布式redis实现一个分布式session以及分布式锁  
 2.服务器任务定时并发的问题
 3.其他业务场景
-###好处
+###好处  
 1.可以提高服务性能，并发能力，以及高可用性  
 2.提高项目的横项扩展能力
-###部署方式  
+###部署方式   
 1.单机部署多应用  
 2.机部署多应用  
-###单机部署多应用安装方法
-####linux下安装
+###单机部署多应用安装方法  
+####linux下安装  
 1.编辑/etc/profile文件,添加如下语句  
 ```text
 vim /etc/profile
@@ -272,7 +272,7 @@ vim server.xml
               redirectPort="8443" />
 ```
   
-####windows下安装
+####windows下安装  
 1.设置系统变量,添加如下语句  
 ```text
 CATALINA_1_HOME=c:\tomcat85_1
@@ -300,11 +300,11 @@ vim server.xml
               port="端口不重复就可以"
               redirectPort="8443" />
 ```
-###多机部署单应用安装方法
+###多机部署单应用安装方法  
 没有特别要求
 
-##Nginx集群部署
-###配置策略  
+##Nginx集群部署  
+###配置策略    
 重点upstream后面的名字，必须与location/proxy_pass后的字符串一致
 
 &ensp;&ensp;1.) 轮询(默认配置)  
@@ -354,7 +354,7 @@ upstream www.foo.com{
     fair;
 }
 ```      
-###例子
+###例子  
 ```text
 upstream www.foo.com{
     ip_hash;
@@ -370,9 +370,9 @@ upstream www.foo.com{
 2.非调试此步骤忽略, 修改浏览器所在计算机的host文件,这步是因为没有域名，本地修改模拟域名解析
 3.启动Nginx
 
-#Redis
-##安装
-###linux
+#Redis  
+##安装  
+###linux  
 1. sudo yum install tcl  #如果不安装，第6步骤的make test可能会出错
 2. wget http://download.redis.io/releases/redis-2.8.0.tar.gz  
 3. tar xzf redis-2.8.0.tar.gz  
@@ -380,24 +380,24 @@ upstream www.foo.com{
 5. make 
 6. make test            #测试是否安装成功
 
-##redis服务/客户端启动
-###./redis-server                       正常服务模式启动 port= 6379
+##redis服务/客户端启动  
+###./redis-server                       正常服务模式启动 port= 6379  
     ./redis-cli                                 //客户端启动
     ./redis-cli shutdown                        //关闭服务
-###./redis-server ../redis.conf         指定配置文件启动
+###./redis-server ../redis.conf         指定配置文件启动  
     修改redis.conf文件中
     port=xxxx                                    //指定默认启动端口  
     requirepass password                         //指定密码
     ./redis-server ..redis.conf                  //指定配置文件启动服务
-### ./redis-server --port 6380          指定端口启动 port= 6380
+### ./redis-server --port 6380          指定端口启动 port= 6380  
     ./redis-cli -p 6380                          //客户端指定端口启动
     ./redis-cli -p 6380 shutdown                 //关闭服务
-### ./redis-cli -p 6379 -h 127.0.0.1    连接指定ip port的redis服务
+### ./redis-cli -p 6379 -h 127.0.0.1    连接指定ip port的redis服务  
     ./redis-cli -p 6379 -h 127.0.0.1 shutdown    //关闭指定ip port的redis服务
-### ./redis-cli -p 6379 -a password     使用密码连接
+### ./redis-cli -p 6379 -a password     使用密码连接  
 
-##命令
-### 基础命令  
+##命令  
+### 基础命令   
     a. info                                         //系统信息
     b. select ${number}                             //选择DB
     c. flushdb                                      //清除当前选择的db数据
@@ -408,7 +408,7 @@ upstream www.foo.com{
     h. quit                                         //退出redis-cli连接
     i. clear                                        //清除屏幕
     j. monitor                                      //查看日志
-### redis键命令
+### redis键命令  
     a. keys *                                       //显示当前db中的全部键
     b. set key data                                 //设置一个键值对
        set test 测试数据
@@ -426,7 +426,7 @@ upstream www.foo.com{
        rename oldTest newTest
     k. renameNX oldKey newKey                       //nx的命令，都带条件判断, 把oldkey替换为newkey,  如果newKey存在于db中，则rename不成功
        renameNX oldTest newTest
-###string命令
+###string命令  
     a. setex key sec value                          //setex(set expire)  时间单位为秒 
        setex c 100 c
     b. psetex key msec value                        //setex(set expire)  时间单位为毫秒 
@@ -449,7 +449,7 @@ upstream www.foo.com{
     l. incrby key step                              //如果key对应的是数值，则把key对应的value加step个
     m. decrby key step                              //如果key对应的是数值，则把key对应的value减step个
     n. append key appendValue                       //把key对应的value拼接上appendValue
-###hash命令
+###hash命令  
     a. hset map key value                           //设置一个hash key是map 值是 key value的键值对
        hset map name wangjian
     b. hexists key key1                             //返回为key的hash中的key1是否存在
@@ -462,7 +462,7 @@ upstream www.foo.com{
     h. hmset key key1 value1 key2 value2            //设置key对应的hash中的key1 key2对应的 value1 value2
     i. hdel key key1 key2                           //删除key对应的hash中的key1 key2
     i. hsetnx key key1 value1                       //批量设置 先判断，如果Key对应的hash存在于db中，并且key1存在,  则set不成功（原子操作）
-###list命令(允许出现重复值, 以stack方式存放，先放的在最后)
+###list命令(允许出现重复值, 以stack方式存放，先放的在最后)  
     a. lpush key value1 value2 value3 .. valuen     //批量设置名称为key的list中的value值
     b. llen key                                     //返回名称为key的list的长度
     c. lrange key start end                         //返回名称为key的list的单元从start开始到end结束的值 0为起始
@@ -470,7 +470,7 @@ upstream www.foo.com{
     e. lindex key pos                               //返回名称为key的list的第pos个单元的值
     f. lpop key                                     //移除名称为key的list的第1个单元
     g. rpop key                                     //移除名称为key的list的最后1个单元
-###set命令(不允许出现重复值)
+###set命令(不允许出现重复值)  
     a. sadd key value1 value2 ... valuen            //批量添加名称为key的set中的value值, 如果value已经存在，不添加，不存在的value值会继续添加，不会报错
     b. scard key                                    //返回名称为key的set的数量
     c. smembers key                                 //返回名称为key的set的成员
@@ -481,7 +481,7 @@ upstream www.foo.com{
     h. sismember key value                          //返回名称为key的set中, value是不是其成员元素   1存在，0不存在
     i. srem key value1, value2 .. valuen            //移除名称为key的set中, value1, value2, ... valuen
     j. spop key                                     //移除名称为key的set中的一个随机value，并返回改value
-###card命令(有序，并且允许出现重复值， 数据以键值对方式存放)
+###card命令(有序，并且允许出现重复值， 数据以键值对方式存放)  
     a. zadd key value1 key1 value2 key2 ... valuen keyn//批量添加名称为key的card中的key value
     b. zcard key                                    //返回名称为key的card中的元素数量
     c. zscore key key1                              //返回名称为key的card中的键值为key1的元素
@@ -491,9 +491,9 @@ upstream www.foo.com{
     f. zrange key index0 index1                     //返回名称为key的card中，index0-index1区间中元素的key
     f. zrange key index0 index1 withscores          //返回名称为key的card中，index0-index1区间中元素的key和value
 
-##数据结构(5种)
-###String(字符串)
-###List(链表)
-###Set(无序集合)
-###Sort Set(有序集合)
-###Hash(Hash表)
+##数据结构(5种)  
+###String(字符串)  
+###List(链表)  
+###Set(无序集合)  
+###Sort Set(有序集合)  
+###Hash(Hash表)  
