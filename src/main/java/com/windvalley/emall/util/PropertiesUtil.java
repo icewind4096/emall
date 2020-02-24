@@ -39,4 +39,22 @@ public class PropertiesUtil {
         }
         return value.trim();
     }
+
+
+
+    public static Integer getProperty(String key, Integer defaultValue){
+        String value = props.getProperty(key.trim()).trim();
+        if(com.alipay.api.internal.util.StringUtils.isNumeric(value)){
+            return Integer.parseInt(value);
+        }
+        return defaultValue;
+    }
+
+    public static Boolean getProperty(String key, boolean defaultValue) {
+        String value = props.getProperty(key.trim()).trim();
+        if (StringUtils.isNoneBlank(value)){
+            return "true".equals(value.toLowerCase());
+        }
+        return defaultValue;
+    }
 }
