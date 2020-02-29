@@ -8,6 +8,9 @@ import com.windvalley.emall.enums.ResponseCode;
 import com.windvalley.emall.form.UserInformationForm;
 import com.windvalley.emall.form.UserRegisterForm;
 import com.windvalley.emall.service.IUserService;
+import com.windvalley.emall.util.CookieUtil;
+import com.windvalley.emall.util.JsonUtil;
+import com.windvalley.emall.util.RedisPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -31,15 +35,16 @@ public class UserController {
      * @Author icewind
      * @param userName
      * @param password
-     * @param httpSession
+     * @param session
      * @return UserDTO
      */
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<UserDTO> login(String userName, String password, HttpSession httpSession){
+    public ServerResponse<UserDTO> login(String userName, String password, HttpSession session, HttpServletResponse response){
         ServerResponse<UserDTO> serverResponse = userService.login(userName, password);
         if (serverResponse.isSuccess()){
-            saveUserDataToSession(httpSession, serverResponse.getData());
+            CookieUtil.writeLoginToken(response, session.getId());
+            saveUserDataToRedis(session.getId(), serverResponse.getData());
         }
         return serverResponse;
     }
@@ -177,7 +182,7 @@ public class UserController {
         userInformationForm.setRole(userDTO.getRole());
         ServerResponse<UserDTO> serverResponse = userService.updateInformation(User2UserDTO.convert(userInformationForm));
         if (serverResponse.isSuccess()){
-            saveUserDataToSession(httpSession, serverResponse.getData());
+            saveUserDataToRedis(httpSession.getId(), serverResponse.getData());
         }
         return serverResponse;
     }
@@ -198,7 +203,7 @@ public class UserController {
         return userService.getInformatioin(userDTO.getUsername());
     }
 
-    private void saveUserDataToSession(HttpSession httpSession, UserDTO userDTO) {
-        httpSession.setAttribute(Const.CURRENT_USER, userDTO);
+    private void saveUserDataToRedis(String sessionId, UserDTO userDTO) {
+        RedisPoolUtil.setExpire(sessionId, JsonUtil.object2String(userDTO), Const.REDIS_EXPIRE_TIME);
     }
 }
