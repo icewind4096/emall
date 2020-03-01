@@ -2,7 +2,6 @@ package com.windvalley.emall.service.impl;
 
 import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
-import com.windvalley.emall.common.TokenCache;
 import com.windvalley.emall.converter.User2UserDTO;
 import com.windvalley.emall.converter.UserDTO2User;
 import com.windvalley.emall.dao.UserMapper;
@@ -11,6 +10,7 @@ import com.windvalley.emall.enums.RoleCode;
 import com.windvalley.emall.pojo.User;
 import com.windvalley.emall.service.IUserService;
 import com.windvalley.emall.util.MD5Util;
+import com.windvalley.emall.util.RedisPoolUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,7 +105,7 @@ public class UserService implements IUserService {
         if (checkAnswerAndQuestion(userName, question, answer) > 0){
     //向本地Cache中添加Token
             String token = UUID.randomUUID().toString();
-            TokenCache.setKey(getForgetTokenKey(userName), token);
+            RedisPoolUtil.setExpire(getForgetTokenKey(userName), token, 60 * 60 * 12);
             return ServerResponse.createBySuccess(token);
         }
         return ServerResponse.createByError("用户答案错误");
@@ -124,7 +124,7 @@ public class UserService implements IUserService {
         }
 
     //向本地Cache中查询，对应Token是否存在
-        String localToken = TokenCache.getKey(getForgetTokenKey(userName));
+        String localToken = RedisPoolUtil.get(getForgetTokenKey(userName));
         if (StringUtils.equals(token, localToken) == false){
             return ServerResponse.createByError("无效的Token或者已过期");
         }
