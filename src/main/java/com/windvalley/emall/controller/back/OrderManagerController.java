@@ -1,7 +1,6 @@
 package com.windvalley.emall.controller.back;
 
 import com.github.pagehelper.PageInfo;
-import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.dto.OrderDTO;
 import com.windvalley.emall.dto.UserDTO;
@@ -14,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOFromRedis;
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOKey;
 
 @Controller
 @RequestMapping("/manager/order")
@@ -27,10 +29,10 @@ public class OrderManagerController {
 
     @RequestMapping("/list.do")
     @ResponseBody
-    public ServerResponse<PageInfo> list(HttpSession httpSession
+    public ServerResponse<PageInfo> list(HttpServletRequest request
             , @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
             , @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
@@ -40,14 +42,14 @@ public class OrderManagerController {
 
     /**
      * 得到订单详情
-     * @param httpSession
+     * @param request
      * @param orderId
      * @return
      */
     @RequestMapping("/detail.do")
     @ResponseBody
-    public ServerResponse<OrderDTO> detail(HttpSession httpSession, Long orderId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse<OrderDTO> detail(HttpServletRequest request, Long orderId){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
@@ -58,7 +60,7 @@ public class OrderManagerController {
     /**
      * 订单查询
      * todo现在只做了精确查找orderId
-     * @param httpSession
+     * @param request
      * @param orderId
      * @param pageNumber
      * @param pageSize
@@ -66,10 +68,10 @@ public class OrderManagerController {
      */
     @RequestMapping("search.do")
     @ResponseBody
-    public ServerResponse<PageInfo> search(HttpSession httpSession, Long orderId
+    public ServerResponse<PageInfo> search(HttpServletRequest request, Long orderId
                                           ,@RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
                                           ,@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
@@ -79,8 +81,8 @@ public class OrderManagerController {
 
     @RequestMapping("/delivery.do")
     @ResponseBody
-    public ServerResponse<String> delivery(HttpSession httpSession, Long orderId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse<String> delivery(HttpServletRequest request, Long orderId){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
@@ -88,24 +90,24 @@ public class OrderManagerController {
         return orderService.delivery(orderId);
     }
 
-    private ServerResponse checkUserCanOperate(HttpSession httpSession) {
-        if (checkUserLogin(httpSession) == false){
+    private ServerResponse checkUserCanOperate(HttpServletRequest request) {
+        if (checkUserLogin(request) == false){
             return ServerResponse.createByError(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，需要登录");
         }
 
-        if (checkUserIsManager(httpSession) == false){
+        if (checkUserIsManager(request) == false){
             return ServerResponse.createByError("无管理员权限");
         }
 
         return ServerResponse.createBySuccess();
     }
 
-    private boolean checkUserIsManager(HttpSession httpSession) {
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    private boolean checkUserIsManager(HttpServletRequest request) {
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         return userService.isManagerRole(userDTO.getUsername()).isSuccess();
     }
 
-    private boolean checkUserLogin(HttpSession httpSession) {
-        return (UserDTO) httpSession.getAttribute(Const.CURRENT_USER) != null;
+    private boolean checkUserLogin(HttpServletRequest request) {
+        return getUserDTOFromRedis(getUserDTOKey(request)) != null;
     }
 }

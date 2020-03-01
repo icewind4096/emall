@@ -3,7 +3,6 @@ package com.windvalley.emall.controller.portal;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.github.pagehelper.PageInfo;
-import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.dto.UserDTO;
 import com.windvalley.emall.enums.AlipayCallBackResponse;
@@ -20,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOFromRedis;
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOKey;
 
 @Controller
 @RequestMapping("/order/")
@@ -34,125 +35,125 @@ public class OrderController {
 
     /**
      * 新建订单
-     * @param httpSession
+     * @param request
      * @param shippingId
      * @return
      */
     @RequestMapping("create.do")
     @ResponseBody
-    public ServerResponse create(HttpSession httpSession, Integer shippingId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse create(HttpServletRequest request, Integer shippingId){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
-        return orderService.create(getUserIDFromSession(httpSession), shippingId);
+        return orderService.create(getUserIDFromSession(request), shippingId);
     }
 
     /**
      * 取消订单
-     * @param httpSession
+     * @param request
      * @param orderId
      * @return
      */
     @RequestMapping("cancel.do")
     @ResponseBody
-    public ServerResponse cancel(HttpSession httpSession, Long orderId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse cancel(HttpServletRequest request, Long orderId){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
-        return orderService.cancel(getUserIDFromSession(httpSession), orderId);
+        return orderService.cancel(getUserIDFromSession(request), orderId);
     }
 
     /**
      * 得到购物车中已选择商品
-     * @param httpSession
+     * @param request
      * @return
      */
     @RequestMapping("getordercartproduct.do")
     @ResponseBody
-    public ServerResponse getOrderCartProduct(HttpSession httpSession){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse getOrderCartProduct(HttpServletRequest request){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
-        return orderService.getOrderCartProduct(getUserIDFromSession(httpSession));
+        return orderService.getOrderCartProduct(getUserIDFromSession(request));
     }
 
     /**
      * 得到订单详情
-     * @param httpSession
+     * @param request
      * @param orderId
      * @return
      */
     @RequestMapping("detail.do")
     @ResponseBody
-    public ServerResponse detail(HttpSession httpSession, Long orderId) {
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse detail(HttpServletRequest request, Long orderId) {
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
-        return orderService.detailByOrderIdAndUserId(getUserIDFromSession(httpSession), orderId);
+        return orderService.detailByOrderIdAndUserId(getUserIDFromSession(request), orderId);
     }
 
     /**
      * 用户订单列表
-     * @param httpSession
+     * @param request
      * @param pageNumber
      * @param pageSize
      * @return
      */
     @RequestMapping("list.do")
     @ResponseBody
-    public ServerResponse<PageInfo> list(HttpSession httpSession
+    public ServerResponse<PageInfo> list(HttpServletRequest request
                                         ,@RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
                                         ,@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
-        return orderService.getlistByUserId(getUserIDFromSession(httpSession), pageNumber, pageSize);
+        return orderService.getlistByUserId(getUserIDFromSession(request), pageNumber, pageSize);
     }
 
     /**
      * 订单支付
-     * @param httpSession
+     * @param request
      * @param orderNo
      * @param request
      * @return
      */
     @RequestMapping("pay.do")
     @ResponseBody
-    public ServerResponse pay(HttpSession httpSession, Long orderNo, HttpServletRequest request){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse pay(Long orderNo, HttpServletRequest request){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
         String path = request.getSession().getServletContext().getRealPath(getWebAppUploadDir());
-        return orderService.pay(getUserIDFromSession(httpSession), orderNo, path);
+        return orderService.pay(getUserIDFromSession(request), orderNo, path);
     }
 
     /**
      * 检查订单是否支付
-     * @param httpSession
+     * @param request
      * @param orderNo
      * @return
      */
     @RequestMapping("orderpaied.do")
     @ResponseBody
-    public ServerResponse<Boolean> orderpaied(HttpSession httpSession, Long orderNo){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse<Boolean> orderpaied(HttpServletRequest request, Long orderNo){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
 
-        return orderService.orderpaied(getUserIDFromSession(httpSession), orderNo);
+        return orderService.orderpaied(getUserIDFromSession(request), orderNo);
     }
 
     /**
@@ -214,19 +215,19 @@ public class OrderController {
         return PropertiesUtil.getProperty("webapp.upload.dir");
     }
 
-    private Integer getUserIDFromSession(HttpSession httpSession) {
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    private Integer getUserIDFromSession(HttpServletRequest request) {
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         return userDTO.getId();
     }
 
-    private ServerResponse checkUserCanOperate(HttpSession httpSession) {
-        if (checkUserLogin(httpSession) == false){
+    private ServerResponse checkUserCanOperate(HttpServletRequest request) {
+        if (checkUserLogin(request) == false){
             return ServerResponse.createByError(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，需要登录");
         }
         return ServerResponse.createBySuccess();
     }
 
-    private boolean checkUserLogin(HttpSession httpSession) {
-        return (UserDTO) httpSession.getAttribute(Const.CURRENT_USER) != null;
+    private boolean checkUserLogin(HttpServletRequest request) {
+        return getUserDTOFromRedis(getUserDTOKey(request)) != null;
     }
 }

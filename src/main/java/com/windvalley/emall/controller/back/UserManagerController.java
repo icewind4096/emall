@@ -5,6 +5,8 @@ import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.dto.UserDTO;
 import com.windvalley.emall.enums.RoleCode;
 import com.windvalley.emall.service.IUserService;
+import com.windvalley.emall.util.JsonUtil;
+import com.windvalley.emall.util.RedisPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,7 +37,7 @@ public class UserManagerController {
         if (serverResponse.isSuccess()){
             UserDTO userDTO = serverResponse.getData();
             if (userDTO.getRole() == RoleCode.ADMIN.getCode()){
-                saveUserDataToSession(httpSession, serverResponse.getData());
+                saveUserDataToRedis(httpSession.getId(), serverResponse.getData());
                 return serverResponse;
             } else {
                 return ServerResponse.createByError("不是管理员, 不可登录");
@@ -44,7 +46,7 @@ public class UserManagerController {
         return serverResponse;
     }
 
-    private void saveUserDataToSession(HttpSession httpSession, UserDTO userDTO) {
-        httpSession.setAttribute(Const.CURRENT_USER, userDTO);
+    private void saveUserDataToRedis(String sessionId, UserDTO userDTO) {
+        RedisPoolUtil.setExpire(sessionId, JsonUtil.object2String(userDTO), Const.REDIS_EXPIRE_TIME);
     }
 }

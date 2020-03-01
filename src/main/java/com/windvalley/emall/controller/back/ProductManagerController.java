@@ -1,7 +1,6 @@
 package com.windvalley.emall.controller.back;
 
 import com.github.pagehelper.PageInfo;
-import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.converter.Product2ProductDTO;
 import com.windvalley.emall.dto.ProductDTO;
@@ -22,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOFromRedis;
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOKey;
 
 @Controller
 @RequestMapping("/manager/product")
@@ -40,14 +41,14 @@ public class ProductManagerController {
 
     /**
      * 新建产品信息
-     * @param httpSession
+     * @param request
      * @param productFrom
      * @return
      */
     @RequestMapping("save.do")
     @ResponseBody
-    public ServerResponse save(HttpSession httpSession, ProductFrom productFrom){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse save(HttpServletRequest request, ProductFrom productFrom){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess()){
             return productService.save(Product2ProductDTO.convert(productFrom));
         }
@@ -56,14 +57,14 @@ public class ProductManagerController {
 
     /**
      * 修改产品信息
-     * @param httpSession
+     * @param request
      * @param productFrom
      * @return
      */
     @RequestMapping("update.do")
     @ResponseBody
-    public ServerResponse update(HttpSession httpSession, ProductFrom productFrom){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse update(HttpServletRequest request, ProductFrom productFrom){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess()){
             return productService.update(Product2ProductDTO.convert(productFrom));
         }
@@ -72,26 +73,26 @@ public class ProductManagerController {
 
     /**
      * 商品删除
-     * @param httpSession
+     * @param request
      * @param productId
      * @return
      */
     @RequestMapping("delete.do")
     @ResponseBody
-    public ServerResponse delete(HttpSession httpSession, Integer productId){
-        return updateStatus(httpSession, productId, ProductStatus.DELETE.getCode());
+    public ServerResponse delete(HttpServletRequest request, Integer productId){
+        return updateStatus(request, productId, ProductStatus.DELETE.getCode());
     }
 
     /**
      * 商品明细
-     * @param httpSession
+     * @param request
      * @param productId
      * @return
      */
     @RequestMapping("detail.do")
     @ResponseBody
-    public ServerResponse<ProductDTO> getDetail(HttpSession httpSession, Integer productId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse<ProductDTO> getDetail(HttpServletRequest request, Integer productId){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess()){
             return productService.getDetailByManager(productId);
         }
@@ -100,16 +101,16 @@ public class ProductManagerController {
 
     /**
      * 商品列表
-     * @param httpSession
+     * @param request
      * @param pageNumber
      * @param pageSize
      * @return
      */
     @RequestMapping("list.do")
     @ResponseBody
-    public ServerResponse<PageInfo> getList(HttpSession httpSession, @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
+    public ServerResponse<PageInfo> getList(HttpServletRequest request, @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
                                  , @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess()){
             return productService.getProductListByManager(pageNumber, pageSize);
         }
@@ -127,7 +128,7 @@ public class ProductManagerController {
      */
     @RequestMapping("search.do")
     @ResponseBody
-    public ServerResponse<PageInfo> search(HttpSession httpSession
+    public ServerResponse<PageInfo> search(HttpServletRequest httpSession
                                 ,String productName, Integer productId
                                 ,@RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
                                 ,@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize){
@@ -146,7 +147,7 @@ public class ProductManagerController {
      */
     @RequestMapping("statusonline.do")
     @ResponseBody
-    public ServerResponse updateStatusOnline(HttpSession httpSession, Integer productId){
+    public ServerResponse updateStatusOnline(HttpServletRequest httpSession, Integer productId){
         return updateStatus(httpSession, productId, ProductStatus.ONLINE.getCode());
     }
 
@@ -158,21 +159,21 @@ public class ProductManagerController {
      */
     @RequestMapping("statusoffline.do")
     @ResponseBody
-    public ServerResponse updateStatusOffline(HttpSession httpSession, Integer productId){
+    public ServerResponse updateStatusOffline(HttpServletRequest httpSession, Integer productId){
         return updateStatus(httpSession, productId, ProductStatus.OFFLINE.getCode());
     }
 
     /**
      * 上传文件
-     * @param httpSession
+     * @param request
      * @param file
      * @param request
      * @return
      */
     @RequestMapping("upload.do")
     @ResponseBody
-    public ServerResponse upload(HttpSession httpSession, MultipartFile file, HttpServletRequest request){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse upload(MultipartFile file, HttpServletRequest request){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             return serverResponse;
         }
@@ -200,7 +201,7 @@ public class ProductManagerController {
 
     /**
      * 上传富文本
-     * @param httpSession
+     * @param response
      * @param file
      * @param request
      * @return 富文本的返回有特定格式
@@ -212,9 +213,9 @@ public class ProductManagerController {
      */
     @RequestMapping("richUpload.do")
     @ResponseBody
-    public Map richUpload(HttpSession httpSession, MultipartFile file, HttpServletRequest request, HttpServletResponse response){
+    public Map richUpload(MultipartFile file, HttpServletRequest request, HttpServletResponse response){
         Map<String, String> map = new HashMap<>();
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == false){
             map = getUploadRichResponseDataError(serverResponse.getMsg());
         } else {
@@ -244,32 +245,32 @@ public class ProductManagerController {
         return getFTPServerPrefix() + fileName;
     }
 
-    private ServerResponse updateStatus(HttpSession httpSession, Integer productId, Integer status) {
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    private ServerResponse updateStatus(HttpServletRequest request, Integer productId, Integer status) {
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess()){
             return productService.updateStatus(productId, status);
         }
         return serverResponse;
     }
 
-    private ServerResponse checkUserCanOperate(HttpSession httpSession) {
-        if (checkUserLogin(httpSession) == false){
+    private ServerResponse checkUserCanOperate(HttpServletRequest request) {
+        if (checkUserLogin(request) == false){
             return ServerResponse.createByError(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，需要登录");
         }
 
-        if (checkUserIsManager(httpSession) == false){
+        if (checkUserIsManager(request) == false){
             return ServerResponse.createByError("无管理员权限");
         }
 
         return ServerResponse.createBySuccess();
     }
 
-    private boolean checkUserIsManager(HttpSession httpSession) {
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    private boolean checkUserIsManager(HttpServletRequest request) {
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         return userService.isManagerRole(userDTO.getUsername()).isSuccess();
     }
 
-    private boolean checkUserLogin(HttpSession httpSession) {
-        return (UserDTO) httpSession.getAttribute(Const.CURRENT_USER) != null;
+    private boolean checkUserLogin(HttpServletRequest request) {
+        return getUserDTOFromRedis(getUserDTOKey(request)) != null;
     }
 }

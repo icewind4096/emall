@@ -1,6 +1,5 @@
 package com.windvalley.emall.controller.back;
 
-import com.windvalley.emall.common.Const;
 import com.windvalley.emall.common.ServerResponse;
 import com.windvalley.emall.dto.UserDTO;
 import com.windvalley.emall.enums.ResponseCode;
@@ -13,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOFromRedis;
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOKey;
 
 @Controller
 @RequestMapping("/manager/category/")
@@ -27,16 +29,16 @@ public class CategoryManagerController {
 
     /**
      * 添加商品分类
-     * @param httpSession
+     * @param request
      * @param categoryName
      * @param parentId
      * @return
      */
     @RequestMapping("addcategory.do")
     @ResponseBody
-    public ServerResponse addCategory(HttpSession httpSession, String categoryName
+    public ServerResponse addCategory(HttpServletRequest request, String categoryName
                                      ,@RequestParam(value = "parentId", defaultValue = "0") int parentId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == true){
             return categoryService.addCategory(categoryName, parentId);
         }
@@ -45,15 +47,15 @@ public class CategoryManagerController {
 
     /**
      * 修改分类名称
-     * @param httpSession
+     * @param request
      * @param categoryName
      * @param categoryId
      * @return
      */
     @RequestMapping("updatecategoryname.do")
     @ResponseBody
-    public ServerResponse updateCategoryName(HttpSession httpSession, String categoryName, Integer categoryId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+    public ServerResponse updateCategoryName(HttpServletRequest request, String categoryName, Integer categoryId){
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == true){
             return categoryService.updateCategoryNameById(categoryName, categoryId);
         }
@@ -62,15 +64,15 @@ public class CategoryManagerController {
 
     /**
      * 得到当前category下的第一层子节点
-     * @param httpSession
+     * @param request
      * @param categoryId
      * @return
      */
     @RequestMapping("getcategory.do")
     @ResponseBody
-    public ServerResponse getChildrenParallelCategorys(HttpSession httpSession
+    public ServerResponse getChildrenParallelCategorys(HttpServletRequest request
                                                      ,@RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == true){
             return categoryService.getChildrenParallelCategorys(categoryId);
         }
@@ -79,39 +81,39 @@ public class CategoryManagerController {
 
     /**
      * 获得当前category下的所有子节点
-     * @param httpSession
+     * @param request
      * @param categoryId
      * @return
      */
     @RequestMapping("getdeepcategory.do")
     @ResponseBody
-    public ServerResponse getAllCategorys(HttpSession httpSession
+    public ServerResponse getAllCategorys(HttpServletRequest request
             ,@RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId){
-        ServerResponse serverResponse = checkUserCanOperate(httpSession);
+        ServerResponse serverResponse = checkUserCanOperate(request);
         if (serverResponse.isSuccess() == true){
             return categoryService.selectCategoryChildById(categoryId);
         }
         return serverResponse;
     }
 
-    private ServerResponse checkUserCanOperate(HttpSession httpSession) {
-        if (checkUserLogin(httpSession) == false){
+    private ServerResponse checkUserCanOperate(HttpServletRequest request) {
+        if (checkUserLogin(request) == false){
             return ServerResponse.createByError(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，需要登录");
         }
 
-        if (checkUserIsManager(httpSession) == false){
+        if (checkUserIsManager(request) == false){
             return ServerResponse.createByError("无管理员权限");
         }
 
         return ServerResponse.createBySuccess();
     }
 
-    private boolean checkUserIsManager(HttpSession httpSession) {
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    private boolean checkUserIsManager(HttpServletRequest request) {
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         return userService.isManagerRole(userDTO.getUsername()).isSuccess();
     }
 
-    private boolean checkUserLogin(HttpSession httpSession) {
-        return (UserDTO) httpSession.getAttribute(Const.CURRENT_USER) != null;
+    private boolean checkUserLogin(HttpServletRequest request) {
+        return getUserDTOFromRedis(getUserDTOKey(request)) != null;
     }
 }

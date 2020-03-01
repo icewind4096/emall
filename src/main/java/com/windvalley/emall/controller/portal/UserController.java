@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOFromRedis;
+import static com.windvalley.emall.controller.common.UserLogin.getUserDTOKey;
 
 @Controller
 @RequestMapping("/user/")
@@ -52,13 +56,15 @@ public class UserController {
     /**
      * 前台用户登出
      * @Author icewind
-     * @param httpSession
+     * @param request
+     * @param response
      * @return
      */
     @RequestMapping(value = "checkout.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<String> checkout(HttpSession httpSession){
-        httpSession.removeAttribute(Const.CURRENT_USER);
+    public ServerResponse<String> checkout(HttpServletResponse response, HttpServletRequest request){
+        removeUserDataToRedis(getUserDTOKey(request));
+        CookieUtil.delLoginToken(request, response);
         return ServerResponse.createBySuccess();
     }
 
@@ -90,13 +96,13 @@ public class UserController {
     /**
      * 获取登录用户信息
      * @Author icewind
-     * @param httpSession
+     * @param request
      * @return
      */
     @RequestMapping(value = "getuserinfo.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<UserDTO> getUserInfo(HttpSession httpSession){
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    public ServerResponse<UserDTO> getUserInfo(HttpServletRequest request){
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         if (userDTO != null){
             return ServerResponse.createBySuccess(userDTO);
         }
@@ -146,15 +152,15 @@ public class UserController {
     /**
      * 客户已登录, 重置密码
      * @Author icewind
-     * @param httpSession
+     * @param request
      * @param oldPassword
      * @param newPassword
      * @return
      */
     @RequestMapping(value = "resetPassword.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<String> resetPassword(HttpSession httpSession, String oldPassword, String newPassword){
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    public ServerResponse<String> resetPassword(HttpServletRequest request, String oldPassword, String newPassword){
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         if (userDTO == null) {
             return ServerResponse.createByError("用户未登录");
         }
@@ -164,14 +170,14 @@ public class UserController {
     /**
      * 修改用户信息
      * @Author icewind
-     * @param httpSession
+     * @param request
      * @param userInformationForm
      * @return
      */
     @RequestMapping(value = "updateinformation.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<UserDTO> updateInformation(HttpSession httpSession, UserInformationForm userInformationForm) {
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    public ServerResponse<UserDTO> updateInformation(HttpServletRequest request, UserInformationForm userInformationForm) {
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         if (userDTO == null) {
             return ServerResponse.createByError("用户未登录");
         }
@@ -182,7 +188,7 @@ public class UserController {
         userInformationForm.setRole(userDTO.getRole());
         ServerResponse<UserDTO> serverResponse = userService.updateInformation(User2UserDTO.convert(userInformationForm));
         if (serverResponse.isSuccess()){
-            saveUserDataToRedis(httpSession.getId(), serverResponse.getData());
+            saveUserDataToRedis(getUserDTOKey(request), serverResponse.getData());
         }
         return serverResponse;
     }
@@ -190,13 +196,13 @@ public class UserController {
     /**
      * 获得用户信息
      * @Author icewind
-     * @param httpSession
+     * @param request
      * @return
      */
     @RequestMapping(value = "getinfomation.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<UserDTO> getInformation(HttpSession httpSession) {
-        UserDTO userDTO = (UserDTO) httpSession.getAttribute(Const.CURRENT_USER);
+    public ServerResponse<UserDTO> getInformation(HttpServletRequest request) {
+        UserDTO userDTO = getUserDTOFromRedis(getUserDTOKey(request));
         if (userDTO == null) {
             return ServerResponse.createByError(ResponseCode.NEED_LOGIN.getCode(), "用户未登录，需要登录");
         }
@@ -205,5 +211,9 @@ public class UserController {
 
     private void saveUserDataToRedis(String sessionId, UserDTO userDTO) {
         RedisPoolUtil.setExpire(sessionId, JsonUtil.object2String(userDTO), Const.REDIS_EXPIRE_TIME);
+    }
+
+    private void removeUserDataToRedis(String key) {
+        RedisPoolUtil.del(key);
     }
 }
