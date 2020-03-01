@@ -9,12 +9,14 @@ import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 public class CookieUtil {
-    private static final String COOKIE_DOMAIN = ".emall.com";
+    private static final String COOKIE_DOMAIN = "emall.com";
     private static final String COOKIE_NAME = "emall_login_token";
 
     public static void writeLoginToken(HttpServletResponse response, String token){
         Cookie cookie = new Cookie(COOKIE_NAME, token);
-    //跨域共享cookie
+    //避免一定程度的跨站攻击。防止脚本攻击,禁止了通过脚本获取cookie信息,浏览器不会将其发送给任何第三方
+        cookie.setHttpOnly(true);
+    //跨域共享cookie tomcat8.5版本默认使用的是rfc6265规则,前置.不需要，否则产生异常
         cookie.setDomain(COOKIE_DOMAIN);
     //cookie共享的范围
         cookie.setPath("/");
