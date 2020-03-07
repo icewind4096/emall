@@ -1,19 +1,27 @@
 package com.windvalley.emall.common;
 
 import com.windvalley.emall.util.PropertiesUtil;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.*;
+import redis.clients.util.Hashing;
 
-public class RedisPool {
-    //jedis连接池
-    private static JedisPool pool;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RedisShardedPool {
+    //ShardedJedis 连接池
+    private static ShardedJedisPool pool;
 
     //Redis IP地址
-    private static String ip = PropertiesUtil.getProperty("redis1.ip");
+    private static String redis_1_ip = PropertiesUtil.getProperty("redis1.ip");
 
     //Redis 端口号
-    private static Integer port = PropertiesUtil.getProperty("redis1.port", 6379);
+    private static Integer redis_1_port = PropertiesUtil.getProperty("redis1.port", 6379);
+
+    //Redis IP地址
+    private static String redis_2_ip = PropertiesUtil.getProperty("redis2.ip");
+
+    //Redis 端口号
+    private static Integer redis_2_port = PropertiesUtil.getProperty("redis2.port", 6380);
 
     //Redis 超时时间
     private static Integer timeout = PropertiesUtil.getProperty("redis.timeout", 1000);
@@ -50,18 +58,26 @@ public class RedisPool {
         config.setTestOnReturn(testOnReturn);
         config.setBlockWhenExhausted(blockWhenExhausted);
 
-        pool = new JedisPool(config, ip, port, timeout);
+        JedisShardInfo jedisShardInfo_1 = new JedisShardInfo(redis_1_ip, redis_1_port, timeout);
+        JedisShardInfo jedisShardInfo_2 = new JedisShardInfo(redis_2_ip, redis_2_port, timeout);
+
+        List<JedisShardInfo> jedisShardInfos = new ArrayList<>();
+        jedisShardInfos.add(jedisShardInfo_1);
+        jedisShardInfos.add(jedisShardInfo_2);
+
+        pool = new ShardedJedisPool(config, jedisShardInfos, Hashing.MURMUR_HASH, ShardedJedis.DEFAULT_KEY_TAG_PATTERN);
     }
 
-    public static Jedis getJedis(){
+    public static ShardedJedis getJedis(){
         return pool.getResource();
     }
 
-    public static void returnResource(Jedis jedis){
-        pool.returnResource(jedis);
+    public static void returnResource(ShardedJedis shardedJedis){
+        pool.returnResource(shardedJedis);
     }
 
-    public static void returnBrokenResource(Jedis jedis){
-        pool.returnBrokenResource(jedis);
+    public static void returnBrokenResource(ShardedJedis shardedJedis){
+        pool.returnBrokenResource(shardedJedis);
     }
+
 }

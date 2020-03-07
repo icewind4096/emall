@@ -10,7 +10,7 @@ import com.windvalley.emall.form.UserRegisterForm;
 import com.windvalley.emall.service.IUserService;
 import com.windvalley.emall.util.CookieUtil;
 import com.windvalley.emall.util.JsonUtil;
-import com.windvalley.emall.util.RedisPoolUtil;
+import com.windvalley.emall.util.RedisShardedPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -210,10 +210,10 @@ public class UserController {
     }
 
     private void saveUserDataToRedis(String sessionId, UserDTO userDTO) {
-        RedisPoolUtil.setExpire(sessionId, JsonUtil.object2String(userDTO), Const.REDIS_EXPIRE_TIME);
+        RedisShardedPoolUtil.setExpire(sessionId, JsonUtil.object2String(userDTO), Const.REDIS_EXPIRE_TIME);
     }
 
     private void removeUserDataToRedis(String key) {
-        RedisPoolUtil.del(key);
+        RedisShardedPoolUtil.del(key);
     }
 }
