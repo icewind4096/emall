@@ -3,10 +3,11 @@ package com.windvalley.emall.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class UserDTO {
+public class UserDTO implements Serializable {
     @JsonIgnore
     private Integer id;
 

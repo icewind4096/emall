@@ -16,6 +16,10 @@
     <aop:aspectj-autoproxy/>
 
     <!-- 分离SpringMVC的配置 -->
+
     <!-- 数据源配置 -->
     <import resource="applicationContext-datasource.xml"/>
+    <!-- spring session配置
+    <import resource="applicationContext-session.xml"/>
+    -->
 </beans>

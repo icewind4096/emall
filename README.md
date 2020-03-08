@@ -497,3 +497,33 @@ upstream www.foo.com{
 ###Set(无序集合)  
 ###Sort Set(有序集合)  
 ###Hash(Hash表)  
+
+#Spring Session框架使用
+##步骤
+1.引入POM文件
+```xml
+    <dependency>
+      <groupId>org.springframework.session</groupId>
+      <artifactId>spring-session-data-redis</artifactId>
+      <version>1.2.0.RELEASE</version>
+    </dependency>
+```
+2.修改web.xml,添加过滤器
+```xml
+  <filter>
+      <filter-name>springSessionRespositoryFilter</filter-name>
+      <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+  </filter>
+  <filter-mapping>
+      <filter-name>springSessionRespositoryFilter</filter-name>
+      <url-pattern>*.do</url-pattern>
+  </filter-mapping>
+```
+3.applicationContext.xml导入springsession配置
+```xml
+    <import resource="applicationContext-session.xml"/>
+```
+4.配置springsession
+```xml
+
+```
