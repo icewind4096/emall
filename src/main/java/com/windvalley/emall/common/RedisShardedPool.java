@@ -58,11 +58,11 @@ public class RedisShardedPool {
         config.setTestOnReturn(testOnReturn);
         config.setBlockWhenExhausted(blockWhenExhausted);
 
-        JedisShardInfo jedisShardInfo_1 = new JedisShardInfo(redis_1_ip, redis_1_port, timeout);
+//        JedisShardInfo jedisShardInfo_1 = new JedisShardInfo(redis_1_ip, redis_1_port, timeout);
         JedisShardInfo jedisShardInfo_2 = new JedisShardInfo(redis_2_ip, redis_2_port, timeout);
 
         List<JedisShardInfo> jedisShardInfos = new ArrayList<>();
-        jedisShardInfos.add(jedisShardInfo_1);
+//        jedisShardInfos.add(jedisShardInfo_1);
         jedisShardInfos.add(jedisShardInfo_2);
 
         pool = new ShardedJedisPool(config, jedisShardInfos, Hashing.MURMUR_HASH, ShardedJedis.DEFAULT_KEY_TAG_PATTERN);

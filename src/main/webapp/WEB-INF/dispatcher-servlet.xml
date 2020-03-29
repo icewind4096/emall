@@ -37,4 +37,12 @@
         <property name="maxInMemorySize" value="4096"/>
         <property name="defaultEncoding" value="UTF-8"/>
     </bean>
+
+    <!-- 统一登录 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/manager/**"/>
+            <bean class="com.windvalley.emall.controller.common.interceptor.AuthorityInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 </beans>

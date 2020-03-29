@@ -28,7 +28,7 @@
       <filter-name>characterEncodingFilter</filter-name>
       <url-pattern>/*</url-pattern>
   </filter-mapping>
-<!--
+
   <filter>
       <filter-name>tokenExpireFilter</filter-name>
       <filter-class>com.windvalley.emall.controller.common.TokenExpireFilter</filter-class>
@@ -37,7 +37,7 @@
       <filter-name>tokenExpireFilter</filter-name>
       <url-pattern>*.do</url-pattern>
   </filter-mapping>
--->
+<!-- spring session
   <filter>
       <filter-name>springSessionRepositoryFilter</filter-name>
       <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -46,7 +46,7 @@
       <filter-name>springSessionRepositoryFilter</filter-name>
       <url-pattern>*.do</url-pattern>
   </filter-mapping>
-
+-->
   <listener>
       <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
   </listener>

@@ -527,3 +527,22 @@ upstream www.foo.com{
 ```xml
 
 ```
+#配置拦截器，实现统一登录
+##步骤
+1.配置dispatcher-servlet.xml
+```xml
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!-- 
+            manager/a.do         /manager/*
+            manager/b.do         /manager/*
+            manager/c/c.do       /manager/**
+            manager/d/d.do       /manager/**
+            -->
+            <mvc:mapping path="/manager/**"/>
+            <!-- 不拦截login.do -->
+            <mvc:exclude-mapping path="/manager/login.do"/>
+            <bean class="com.windvalley.emall.controller.common.interceptor.AuthorityInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+```

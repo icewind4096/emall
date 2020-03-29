@@ -110,11 +110,12 @@ public class ProductManagerController {
     @ResponseBody
     public ServerResponse<PageInfo> getList(HttpServletRequest request, @RequestParam(value = "pageNumber", defaultValue = "1") Integer pageNumber
                                  , @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize){
-        ServerResponse serverResponse = checkUserCanOperate(request);
-        if (serverResponse.isSuccess()){
+    //已经用拦截器处理了登录的问题，运行到此的都是检查过的了
+//        ServerResponse serverResponse = checkUserCanOperate(request);
+//        if (serverResponse.isSuccess()){
             return productService.getProductListByManager(pageNumber, pageSize);
-        }
-        return serverResponse;
+//        }
+//        return serverResponse;
     }
 
     /**
@@ -229,7 +230,7 @@ public class ProductManagerController {
     private Map<String, String> getUploadRichResponseDataError(String msg) {
         Map map = new HashMap<String, String>();
         map.put("success", "false");
-        map.put("msg", map);
+        map.put("msg", msg);
         return map;
     }
 
